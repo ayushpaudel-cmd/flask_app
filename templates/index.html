@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudyNotes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+  <nav class="navbar">
+    <a href="{{ url_for('home') }}" class="nav-brand">StudyNotes</a>
+    <div class="nav-actions">
+      {% if session.get('username') %}
+        <a href="{{ url_for('dashboard') }}" data-loading>Dashboard</a>
+        <a href="{{ url_for('questions') }}" data-loading>Questions</a>
+        <a href="{{ url_for('logout') }}" data-loading>Log out</a>
+      {% else %}
+        <a href="{{ url_for('login') }}" data-loading>Log in</a>
+        <a href="{{ url_for('signup') }}" class="btn-outline" data-loading>Sign up</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Share. Learn. Succeed.</h1>
+      <p class="subtitle">A collaborative space for students to exchange class notes.</p>
+      <div class="hero-cta">
+        <a href="{{ url_for('login') }}" class="btn-primary" data-loading>Get Started</a>
+      </div>
+    </div>
+  </section>
+  
+  <section class="stats">
+    <div class="stat-card">
+      <div class="stat-value">500+</div>
+      <div class="stat-label">Active Members</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">5k+</div>
+      <div class="stat-label">Questions Answered</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">24/7</div>
+      <div class="stat-label">Community Help</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">100%</div>
+      <div class="stat-label">Free to Use</div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-brand">StudyNotes</div>
+      <div class="footer-cols">
+        <div>
+          <h4>Explore</h4>
+          <a href="{{ url_for('questions') }}">Questions</a>
+          <a href="{{ url_for('new_question') }}">Ask Question</a>
+        </div>
+        <div>
+          <h4>Account</h4>
+          <a href="{{ url_for('login') }}">Log in</a>
+          <a href="{{ url_for('signup') }}">Sign up</a>
+        </div>
+      </div>
+      <div class="footer-copy">© {{ 2026 }} Nischal-Acharya. All rights reserved.</div>
+    </div>
+  </footer>
+  <div id="loader" class="loading-overlay" hidden><div class="loader"></div></div>
+  <script>
+    (function(){
+      const overlay = document.getElementById('loader');
+      function show(){ overlay.hidden = false; requestAnimationFrame(()=>overlay.classList.add('show')); }
+      function hide(){ overlay.classList.remove('show'); overlay.hidden = true; }
+      document.querySelectorAll('[data-loading]').forEach(a=>a.addEventListener('click', show));
+      window.addEventListener('pageshow', hide);
+    })();
+  </script>
+</body>
+</html>

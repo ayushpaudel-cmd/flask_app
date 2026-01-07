@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Questions — StudyNotes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+  <nav class="navbar">
+    <a href="{{ url_for('home') }}" class="nav-brand">StudyNotes</a>
+    <div class="nav-actions">
+      <a href="{{ url_for('dashboard') }}" data-loading>Dashboard</a>
+      <a href="{{ url_for('logout') }}" data-loading>Log out</a>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container" hidden>
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="notes-page">
+    <div class="page-header">
+      <h2>Questions</h2>
+      <div>
+        <a href="{{ url_for('new_question') }}" class="btn-primary" data-loading>Ask Question</a>
+      </div>
+    </div>
+
+    <form method="get" class="search-row" style="display:flex; gap:0.75rem; margin-bottom:1.5rem;">
+      <input type="text" name="q" placeholder="Search questions..." value="{{ q or '' }}" style="flex:1; padding:0.8rem; border:1px solid var(--border); border-radius:12px;">
+      <select name="subject" style="padding:0.8rem; border:1px solid var(--border); border-radius:12px; min-width: 160px;">
+        <option value="">All Subjects</option>
+        {% for key, name in subjects.items() %}
+          <option value="{{ key }}" {% if selected_subject == key %}selected{% endif %}>{{ name }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn-outline" type="submit">Search</button>
+    </form>
+
+    {% if questions|list %}
+      <div class="notes-list">
+        {% for q in questions %}
+          <a class="note-card" href="{{ url_for('question_detail', question_id=q._id) }}">
+            <div class="note-header">
+              <h3>{{ q.title }}</h3>
+              {% if q.subject %}
+                <span class="subject-tag">{{ subjects.get(q.subject, q.subject) }}</span>
+              {% endif %}
+            </div>
+            <p class="note-meta">by {{ q.author }} • {{ q.created_at.strftime('%b %d, %Y') }}</p>
+            <p>{{ q.content[:200] }}{% if q.content|length > 200 %}…{% endif %}</p>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        {% if q or selected_subject %}
+          <p>No results. Try another search or filter.</p>
+        {% else %}
+          <p>No questions yet. Be the first to <a href="{{ url_for('new_question') }}">ask one</a>!</p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </main>
+  <div id="loader" class="loading-overlay" hidden><div class="loader"></div></div>
+  <script>
+    (function(){
+      const overlay = document.getElementById('loader');
+      function show(){ overlay.hidden = false; requestAnimationFrame(()=>overlay.classList.add('show')); }
+      function hide(){ overlay.classList.remove('show'); overlay.hidden = true; }
+      document.addEventListener('submit', function(e){
+        const btn = e.target.querySelector('button[type="submit"]');
+        if(btn){ btn.classList.add('is-loading'); btn.disabled = true; }
+        show();
+      });
+      document.querySelectorAll('[data-loading]').forEach(a=>a.addEventListener('click', show));
+      window.addEventListener('pageshow', hide);
+
+      // Convert success flash to centered success modal
+      const success = document.querySelector('.flash-success');
+      if(success){
+        const msg = success.textContent.trim();
+        const fc = document.querySelector('.flash-container');
+        if(fc) fc.remove();
+        const modal = document.createElement('div');
+        modal.className = 'success-overlay show';
+        modal.innerHTML = `
+          <div class=\"success-card\">
+            <div class=\"success-icon\">
+              <svg class=\"success-svg\" viewBox=\"0 0 120 120\" aria-hidden=\"true\">
+                <circle cx=\"60\" cy=\"60\" r=\"46\" />
+                <path d=\"M42 62 L56 76 L84 44\" />
+              </svg>
+            </div>
+            <h3>${msg || 'Success!'}</h3>
+            <p>Your action completed successfully.</p>
+            <a href=\"#\" data-back>Go back</a>
+          </div>`;
+        modal.addEventListener('click', (e)=>{ if(e.target === modal){ modal.classList.remove('show'); setTimeout(()=>modal.remove(), 250); } });
+        modal.querySelector('[data-back]')?.addEventListener('click', (e)=>{ e.preventDefault(); history.back(); });
+        document.body.appendChild(modal);
+      }
+    })();
+  </script>
+</body>
+</html>

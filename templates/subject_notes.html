@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ subject }} Notes — StudyNotes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+  <nav class="navbar">
+    <a href="{{ url_for('home') }}" class="nav-brand">StudyNotes</a>
+    <div class="nav-actions">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('my_notes') }}">My Notes</a>
+      <a href="{{ url_for('questions') }}">Questions</a>
+      <a href="{{ url_for('logout') }}">Log out</a>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container" hidden>
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="notes-page">
+    <div class="page-header">
+      <h2>{{ subject }}</h2>
+      <a href="{{ url_for('new_note') }}" class="btn-primary">Submit Note</a>
+    </div>
+
+    {% if notes|list %}
+      <div class="notes-list">
+        {% for note in notes %}
+          <div class="note-card">
+            <h3>{{ note.title }}</h3>
+            <p class="note-meta">by {{ note.author }} • {{ note.created_at.strftime('%b %d, %Y') }}</p>
+            <p>{{ note.content[:180] }}{% if note.content|length > 180 %}…{% endif %}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>No notes yet. Be the first to <a href="{{ url_for('new_note') }}">submit one</a>!</p>
+      </div>
+    {% endif %}
+  </main>
+  <script>
+    (function(){
+      // Convert success flash to centered success modal
+      const success = document.querySelector('.flash-success');
+      if(success){
+        const msg = success.textContent.trim();
+        const fc = document.querySelector('.flash-container');
+        if(fc) fc.remove();
+        const modal = document.createElement('div');
+        modal.className = 'success-overlay show';
+        modal.innerHTML = `
+          <div class=\"success-card\">
+            <div class=\"success-icon\">
+              <svg class=\"success-svg\" viewBox=\"0 0 120 120\" aria-hidden=\"true\">
+                <circle cx=\"60\" cy=\"60\" r=\"46\" />
+                <path d=\"M42 62 L56 76 L84 44\" />
+              </svg>
+            </div>
+            <h3>${msg || 'Success!'}</h3>
+            <p>Your action completed successfully.</p>
+            <a href=\"#\" data-back>Go back</a>
+          </div>`;
+        modal.addEventListener('click', (e)=>{ if(e.target === modal){ modal.classList.remove('show'); setTimeout(()=>modal.remove(), 250); } });
+        modal.querySelector('[data-back]')?.addEventListener('click', (e)=>{ e.preventDefault(); history.back(); });
+        document.body.appendChild(modal);
+      }
+    })();
+   </script>
+</body>
+</html>

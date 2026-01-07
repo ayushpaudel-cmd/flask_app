@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subjects — StudyNotes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+  <nav class="navbar">
+    <a href="{{ url_for('home') }}" class="nav-brand">StudyNotes</a>
+    <div class="nav-actions">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('my_notes') }}">My Notes</a>
+      <a href="{{ url_for('questions') }}">Questions</a>
+      <a href="{{ url_for('logout') }}">Log out</a>
+    </div>
+  </nav>
+
+  <main class="dashboard">
+    <div class="page-header">
+      <h2>All Subjects</h2>
+      <a href="{{ url_for('new_note') }}" class="btn-primary">Submit Note</a>
+    </div>
+
+    <div class="bento-grid">
+      {% for key, name in subjects.items() %}
+        <a href="{{ url_for('subject_notes', subject=key) }}" class="bento-card">
+          <h3>{{ name }}</h3>
+        </a>
+      {% endfor %}
+    </div>
+  </main>
+</body>
+</html>

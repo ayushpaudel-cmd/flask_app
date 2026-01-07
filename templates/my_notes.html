@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Notes — StudyNotes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+  <nav class="navbar">
+    <a href="{{ url_for('home') }}" class="nav-brand">StudyNotes</a>
+    <div class="nav-actions">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('questions') }}">Questions</a>
+      <a href="{{ url_for('logout') }}">Log out</a>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container" hidden>
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="notes-page">
+    <div class="page-header">
+      <h2>My Notes</h2>
+      <a href="{{ url_for('new_note') }}" class="btn-primary">Submit Note</a>
+    </div>
+
+    {% if notes|list %}
+      <div class="notes-list">
+        {% for note in notes %}
+          <div class="note-card">
+            <div class="note-header">
+              <h3>{{ note.title }}</h3>
+              <span class="subject-tag">{{ subjects.get(note.subject, note.subject) }}</span>
+            </div>
+            <p class="note-meta">{{ note.created_at.strftime('%b %d, %Y') }}</p>
+            <p>{{ note.content[:200] }}{% if note.content|length > 200 %}…{% endif %}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>You haven’t submitted any notes yet.</p>
+      </div>
+    {% endif %}
+  </main>
+</body>
+</html>

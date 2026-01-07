@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Submit Note — StudyNotes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+  <nav class="navbar">
+    <a href="{{ url_for('home') }}" class="nav-brand">StudyNotes</a>
+    <div class="nav-actions">
+      <a href="{{ url_for('dashboard') }}">Dashboard</a>
+      <a href="{{ url_for('my_notes') }}">My Notes</a>
+      <a href="{{ url_for('questions') }}">Questions</a>
+      <a href="{{ url_for('logout') }}">Log out</a>
+    </div>
+  </nav>
+
+  <main class="form-page">
+    <div class="form-card">
+      <h2>Submit a Note</h2>
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="title" placeholder="Note Title" required>
+        <select name="subject" required>
+          <option value="" disabled selected>Select Subject</option>
+          {% for key, name in subjects.items() %}
+            <option value="{{ key }}">{{ name }}</option>
+          {% endfor %}
+        </select>
+        <textarea name="content" placeholder="Write your note here..." rows="6" required></textarea>
+        <button type="submit" class="btn-primary full">Submit Note</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>

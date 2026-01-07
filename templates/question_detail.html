@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ question.title }} — StudyNotes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+  <nav class="navbar">
+    <a href="{{ url_for('home') }}" class="nav-brand">StudyNotes</a>
+    <div class="nav-actions">
+      <a href="{{ url_for('questions') }}" data-loading>Questions</a>
+      <a href="{{ url_for('dashboard') }}" data-loading>Dashboard</a>
+      <a href="{{ url_for('logout') }}" data-loading>Log out</a>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container" hidden>
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="notes-page">
+    <div class="note-card">
+      <div class="note-header">
+        <h3>{{ question.title }}</h3>
+        {% if question.subject %}
+          <span class="subject-tag">{{ subjects.get(question.subject, question.subject) }}</span>
+        {% endif %}
+      </div>
+      <p class="note-meta">by {{ question.author }} • {{ question.created_at.strftime('%b %d, %Y') }}</p>
+      <p>{{ question.content }}</p>
+    </div>
+
+    <div class="page-header" style="margin-top: 2rem;">
+      <h2>Answers</h2>
+    </div>
+
+    {% if answers|list %}
+      <div class="notes-list">
+        {% for a in answers %}
+          <div class="note-card">
+            <p class="note-meta">by {{ a.author }} • {{ a.created_at.strftime('%b %d, %Y') }}</p>
+            <p>{{ a.content }}</p>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>No answers yet. Be the first to help!</p>
+      </div>
+    {% endif %}
+
+    {% if session.get('username') %}
+      <div class="form-card" style="margin-top: 2rem;">
+        <h3>Post an Answer</h3>
+        <form method="POST" action="{{ url_for('submit_answer', question_id=question._id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <textarea name="content" placeholder="Write your answer..." rows="5" required></textarea>
+          <button type="submit" class="btn-primary">Submit Answer</button>
+        </form>
+      </div>
+    {% else %}
+      <div class="empty-state" style="margin-top: 2rem;">
+        <p>Please <a href="{{ url_for('login') }}">log in</a> to post an answer.</p>
+      </div>
+    {% endif %}
+  </main>
+  <div id="loader" class="loading-overlay" hidden><div class="loader"></div></div>
+  <script>
+    (function(){
+      const overlay = document.getElementById('loader');
+      function show(){ overlay.hidden = false; requestAnimationFrame(()=>overlay.classList.add('show')); }
+      function hide(){ overlay.classList.remove('show'); overlay.hidden = true; }
+      document.addEventListener('submit', function(e){
+        const btn = e.target.querySelector('button[type="submit"]');
+        if(btn){ btn.classList.add('is-loading'); btn.disabled = true; }
+        show();
+      });
+      document.querySelectorAll('[data-loading]').forEach(a=>a.addEventListener('click', show));
+      window.addEventListener('pageshow', hide);
+
+      // Convert success flash to centered success modal
+      const success = document.querySelector('.flash-success');
+      if(success){
+        const msg = success.textContent.trim();
+        const fc = document.querySelector('.flash-container');
+        if(fc) fc.remove();
+        const modal = document.createElement('div');
+        modal.className = 'success-overlay show';
+        modal.innerHTML = `
+          <div class=\"success-card\">
+            <div class=\"success-icon\">
+              <svg class=\"success-svg\" viewBox=\"0 0 120 120\" aria-hidden=\"true\">
+                <circle cx=\"60\" cy=\"60\" r=\"46\" />
+                <path d=\"M42 62 L56 76 L84 44\" />
+              </svg>
+            </div>
+            <h3>${msg || 'Success!'}</h3>
+            <p>Your action completed successfully.</p>
+            <a href=\"#\" data-back>Go back</a>
+          </div>`;
+        modal.addEventListener('click', (e)=>{ if(e.target === modal){ modal.classList.remove('show'); setTimeout(()=>modal.remove(), 250); } });
+        modal.querySelector('[data-back]')?.addEventListener('click', (e)=>{ e.preventDefault(); history.back(); });
+        document.body.appendChild(modal);
+      }
+    })();
+  </script>
+</body>
+</html>

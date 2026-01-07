@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ask Question — StudyNotes</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Serif+Display&display=swap" rel="stylesheet">
+</head>
+<body class="light-mode">
+  <nav class="navbar">
+    <a href="{{ url_for('home') }}" class="nav-brand">StudyNotes</a>
+    <div class="nav-actions">
+      <a href="{{ url_for('dashboard') }}" data-loading>Dashboard</a>
+      <a href="{{ url_for('questions') }}" data-loading>Questions</a>
+      <a href="{{ url_for('logout') }}" data-loading>Log out</a>
+    </div>
+  </nav>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-container" hidden>
+        {% for category, message in messages %}
+          <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <main class="form-page">
+    <div class="form-card">
+      <h2>Ask a Question</h2>
+      <form method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="text" name="title" placeholder="Question Title" required>
+        <select name="subject">
+          <option value="" selected>General</option>
+          {% for key, name in subjects.items() %}
+            <option value="{{ key }}">{{ name }}</option>
+          {% endfor %}
+        </select>
+        <textarea name="content" placeholder="Describe your question..." rows="6" required></textarea>
+        <button type="submit" class="btn-primary full">Post Question</button>
+      </form>
+    </div>
+  </main>
+  <div id="loader" class="loading-overlay" hidden><div class="loader"></div></div>
+  <script>
+    (function(){
+      const overlay = document.getElementById('loader');
+      function show(){ overlay.hidden = false; requestAnimationFrame(()=>overlay.classList.add('show')); }
+      function hide(){ overlay.classList.remove('show'); overlay.hidden = true; }
+      document.addEventListener('submit', function(e){
+        const btn = e.target.querySelector('button[type="submit"]');
+        if(btn){ btn.classList.add('is-loading'); btn.disabled = true; }
+        show();
+      });
+      document.querySelectorAll('[data-loading]').forEach(a=>a.addEventListener('click', show));
+      window.addEventListener('pageshow', hide);
+    })();
+  </script>
+</body>
+</html>
